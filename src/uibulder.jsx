@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'; // <--- Added useCallback
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Move, 
   Plus, 
@@ -12,10 +12,10 @@ import {
   Palette,
   Layout,
   Circle,
-  Save 
+  Save
 } from 'lucide-react';
 
-const INITIAL_ELEMENTS = [
+const UI_INITIAL_ELEMENTS = [
   {
     id: 'header-1',
     type: 'text',
@@ -72,12 +72,15 @@ const INITIAL_ELEMENTS = [
   }
 ];
 
-export default function UIBuilderGame() {
+export default function UIBuilder() {
   const [mode, setMode] = useState('play'); 
   
   const [elements, setElements] = useState(() => {
-    const saved = localStorage.getItem('shaboygan-layout');
-    return saved ? JSON.parse(saved) : INITIAL_ELEMENTS;
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('shaboygan-layout');
+        return saved ? JSON.parse(saved) : UI_INITIAL_ELEMENTS;
+    }
+    return UI_INITIAL_ELEMENTS;
   });
 
   const [selectedId, setSelectedId] = useState(null);
@@ -87,7 +90,6 @@ export default function UIBuilderGame() {
    
   const canvasRef = useRef(null);
 
-  // --- Game Logic ---
   const addLog = (msg) => {
     setLogs(prev => [msg, ...prev].slice(0, 8));
   };
@@ -113,7 +115,6 @@ export default function UIBuilderGame() {
     }
   };
 
-  // --- Editor Logic (Wrapped in useCallback) ---
   const updateElement = useCallback((id, newProps) => {
     setElements(prev => prev.map(el => 
       el.id === id ? { ...el, ...newProps } : el
@@ -136,7 +137,6 @@ export default function UIBuilderGame() {
 
     let newElement = { id: newId, type, style: baseStyle };
 
-    // Element definitions...
     if (type === 'button') {
       newElement = { ...newElement, content: 'NEW BUTTON', style: { ...baseStyle, width: 140, height: 40, backgroundColor: '#3b82f6', color: 'white', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } };
     } else if (type === 'text') {
@@ -160,7 +160,6 @@ export default function UIBuilderGame() {
     }
   };
 
-  // --- Drag & Drop (Wrapped in useCallback) ---
   const handleMouseDown = (e, id) => {
     if (mode !== 'edit') return;
     e.stopPropagation();
@@ -191,7 +190,7 @@ export default function UIBuilderGame() {
     const newY = relY - dragOffset.y;
 
     updateStyle(draggingId, { x: newX, y: newY });
-  }, [draggingId, mode, dragOffset, updateStyle]); // Dependencies fixed!
+  }, [draggingId, mode, dragOffset, updateStyle]);
 
   const handleMouseUp = useCallback(() => {
     setDraggingId(null);
@@ -208,7 +207,6 @@ export default function UIBuilderGame() {
     };
   }, [draggingId, handleMouseMove, handleMouseUp]);
 
-  // --- Render Helpers ---
   const renderPropertiesPanel = () => {
     if (!selectedId) return <div className="text-gray-500 text-sm italic p-4">Select an element to edit properties.</div>;
 
@@ -279,7 +277,7 @@ export default function UIBuilderGame() {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-gray-950 text-gray-100 overflow-hidden font-sans select-none">
+    <div className="flex h-full w-full bg-gray-950 text-gray-100 overflow-hidden font-sans select-none">
       <div 
         ref={canvasRef}
         className={`relative flex-1 bg-gray-900 overflow-hidden transition-colors duration-500 ${mode === 'edit' ? 'cursor-crosshair' : 'cursor-default'}`}

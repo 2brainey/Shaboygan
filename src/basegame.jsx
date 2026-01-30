@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Zap, 
   Box, 
@@ -76,21 +76,18 @@ const INITIAL_RESOURCES = {
   maxMinerals: 50
 };
 
-export default function BaseBuildingGame() {
-  // --- State ---
+export default function BaseGame() {
   const [resources, setResources] = useState(INITIAL_RESOURCES);
   const [grid, setGrid] = useState(Array(GRID_SIZE * GRID_SIZE).fill(null));
   const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [lastTickStats, setLastTickStats] = useState({ netEnergy: 0, netMinerals: 0 });
   const [notification, setNotification] = useState(null);
 
-  // --- Helpers ---
   const showNotification = (msg) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 2000);
   };
 
-  // --- Game Loop (The "Tick") ---
   useEffect(() => {
     const tick = setInterval(() => {
       setResources(current => {
@@ -99,7 +96,6 @@ export default function BaseBuildingGame() {
         let newMaxEnergy = INITIAL_RESOURCES.maxEnergy;
         let newMaxMinerals = INITIAL_RESOURCES.maxMinerals;
 
-        // 1. Calculate Capacity
         grid.forEach(cell => {
           if (cell) {
             const type = BUILDING_TYPES[cell.type];
@@ -108,7 +104,6 @@ export default function BaseBuildingGame() {
           }
         });
 
-        // 2. Calculate Production/Consumption
         let tempEnergy = current.energy;
         grid.forEach(cell => {
           if (cell) {
@@ -135,7 +130,6 @@ export default function BaseBuildingGame() {
     return () => clearInterval(tick);
   }, [grid]);
 
-  // --- Interaction Logic ---
   const handleGridClick = (index) => {
     if (!selectedBuilding) {
       if (grid[index]) {
