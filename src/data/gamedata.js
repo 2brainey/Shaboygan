@@ -27,21 +27,30 @@ export const TOTAL_SKILLS = 8;
 
 export const SHOP_ITEMS = {
     boosters: [
-        { id: 'xp_chip_s', name: 'XP Chip (S)', cost: 500, rarity: 'Common', iconName: 'Cpu', effect: '+100 XP to active skill', type: 'Booster', xpAmount: 100 },
-        { id: 'xp_chip_m', name: 'XP Chip (M)', cost: 1200, rarity: 'Uncommon', iconName: 'Cpu', effect: '+500 XP to active skill', type: 'Booster', xpAmount: 500 },
-        { id: 'xp_chip_l', name: 'XP Chip (L)', cost: 5000, rarity: 'Rare', iconName: 'Cpu', effect: '+2500 XP to active skill', type: 'Booster', xpAmount: 2500 },
+        { 
+            id: 'xp_chip_s', 
+            name: 'XP Chip (S)', 
+            cost: 500, 
+            rarity: 'Common', 
+            graphic: '/src/assets/items/chip_small.png', // Add this
+            iconName: 'Cpu', 
+            effect: '+100 XP to active skill', 
+            type: 'Booster', 
+            xpAmount: 100 
+        },
+        // ... apply to others
     ],
     gear: [
-        { id: 'deed_plot', name: 'Land Deed', cost: 10000, rarity: 'Rare', iconName: 'Map', effect: 'Unlocks 1 Estate Grid Slot', type: 'Deed', isDeed: true },
-        { id: 'suit_mk1', name: 'Exo-Suit MK1', cost: 2500, rarity: 'Uncommon', iconName: 'Shield', effect: '+5% Physical Resistance', type: 'Gear' },
-    ],
-    packs: [
-        { id: 'pack_starter', name: 'Starter Pack', cost: 1000, rarity: 'Common', iconName: 'Package', effect: 'Contains 3 random cards', type: 'Pack' },
-        { id: 'pack_premium', name: 'Premium Pack', cost: 5000, rarity: 'Rare', iconName: 'Gift', effect: 'Contains 5 cards (1 Rare+)', type: 'Pack' },
-    ],
-    crates: [
-        { id: 'crate_daily', name: 'Daily Supply', cost: 0, rarity: 'Common', iconName: 'Box', effect: 'Free resources every 24h', type: 'Crate', isDailyClaim: true },
-        { id: 'crate_hourly', name: 'Hourly Drop', cost: 0, rarity: 'Uncommon', iconName: 'Clock', effect: 'Random item every 1h', type: 'Crate', isHourlyClaim: true },
+        { 
+            id: 'suit_mk1', 
+            name: 'Exo-Suit MK1', 
+            cost: 2500, 
+            rarity: 'Uncommon', 
+            graphic: '/src/assets/items/exo_suit_v1.jpg', 
+            iconName: 'Shield', 
+            effect: '+5% Physical Resistance', 
+            type: 'Gear' 
+        },
     ]
 };
 

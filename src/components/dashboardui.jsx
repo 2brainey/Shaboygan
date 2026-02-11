@@ -1,128 +1,172 @@
-import React, { useState } from 'react';
-import { 
-  X, Check, Lock, ChevronRight, Star, 
-  Trophy, AlertTriangle, Package, DollarSign,
-  Zap, Droplet, Brain, Wrench
-} from 'lucide-react';
-// FIXED IMPORT: Using 'getRarityColor' (CamelCase)
-import { RenderIcon, getRarityColor, getRarityGradient } from './dashboardutils';
-import { CARD_DATABASE, SKILL_DETAILS } from '../data/gamedata';
+import React from 'react';
+import { RenderIcon } from './dashboardutils';
+import { CARD_DATABASE } from '../data/gamedata';
 
-// --- RESOURCE CARD ---
-export const ResourceCard = ({ cash, discipline, salvage }) => (
-    <div className="bg-[#1e1e1e] p-4 rounded-xl border border-slate-700 shadow-lg mb-4 flex flex-col gap-3">
-        <div className="flex items-center justify-between border-b border-slate-700 pb-2">
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Liquid Assets</span>
-            <span className="text-emerald-400 font-mono font-bold text-lg flex items-center gap-1">
-                <span className="text-xs text-emerald-600">$</span> {(cash || 0).toLocaleString()}
-            </span>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-            <div className="bg-black/30 p-2 rounded border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden group">
-                <div className="absolute inset-0 bg-pink-900/10 group-hover:bg-pink-900/20 transition-colors"></div>
-                <Brain size={16} className="text-pink-500 mb-1 z-10" />
-                <span className="text-white font-bold font-mono z-10">{(discipline || 0).toLocaleString()}</span>
-                <span className="text-[9px] text-pink-400 uppercase font-bold z-10">Brain Matter</span>
-            </div>
-            <div className="bg-black/30 p-2 rounded border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden group">
-                <div className="absolute inset-0 bg-blue-900/10 group-hover:bg-blue-900/20 transition-colors"></div>
-                <Wrench size={16} className="text-blue-500 mb-1 z-10" />
-                <span className="text-white font-bold font-mono z-10">{(salvage || 0).toLocaleString()}</span>
-                <span className="text-[9px] text-blue-400 uppercase font-bold z-10">Salvage</span>
-            </div>
-        </div>
-    </div>
-);
+// --- UPDATED SUB-COMPONENT: INVENTORY SLOT ---
+export const InventorySlot = ({ item, index, onDragStart, onDrop, onContextMenu, onUse }) => {
+    const isOccupied = item !== null && item !== undefined;
+    
+    const getRarityColor = (r) => {
+        switch(r) {
+            case 'Legendary': return 'border-amber-500 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
+            case 'Epic': return 'border-purple-500 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]';
+            case 'Rare': return 'border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+            default: return 'border-slate-700 text-slate-400';
+        }
+    };
 
-// --- INVENTORY GRID ---
-export const InventoryGrid = ({ slots, onUseItem, onDrop, onDragStart, onContextMenu, onEquip }) => {
     return (
-        <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
-            {slots.map((item, index) => (
-                <div 
-                    key={index}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => onDrop(e, index)}
-                    className="aspect-square bg-[#131313] rounded border border-slate-800 flex items-center justify-center relative group hover:border-slate-600 transition-colors"
-                    onContextMenu={(e) => onContextMenu(e, item, index)}
-                >
-                    {item ? (
-                        <div 
-                            draggable 
-                            onDragStart={(e) => onDragStart(e, item, index)}
-                            className="w-full h-full p-1 cursor-grab active:cursor-grabbing relative"
-                        >
-                            <div className={`w-full h-full rounded flex flex-col items-center justify-center bg-slate-900/50 ${getRarityColor(item.rarity)} border`}>
-                                <RenderIcon name={item.iconName} size={20} />
-                                {item.count > 1 && (
-                                    <span className="absolute bottom-0.5 right-1 text-[9px] font-bold text-white bg-black/60 px-1 rounded">
-                                        {item.count}
-                                    </span>
-                                )}
-                            </div>
-                            
-                            {/* Tooltip */}
-                            <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-black/90 border border-slate-700 rounded p-2 pointer-events-none z-50">
-                                <div className={`text-xs font-bold mb-0.5 ${item.rarity === 'Legendary' ? 'text-amber-400' : 'text-white'}`}>{item.name}</div>
-                                <div className="text-[9px] text-slate-400 mb-1">{item.rarity} {item.type}</div>
-                                <div className="text-[10px] text-slate-300 leading-tight">{item.effect}</div>
-                            </div>
-                        </div>
+        <div 
+            className={`relative aspect-square bg-[#0a0a0a] rounded-lg border-2 transition-all group overflow-hidden ${isOccupied ? getRarityColor(item.rarity) + ' hover:border-white cursor-grab active:cursor-grabbing scale-100 hover:scale-105' : 'border-slate-800/50 hover:border-slate-600'}`}
+            onDragOver={(e) => e.preventDefault()}
+            onDragStart={(e) => isOccupied && onDragStart(index)}
+            onDrop={(e) => onDrop(index)}
+            draggable={isOccupied}
+            onContextMenu={(e) => { e.preventDefault(); onContextMenu(index); }}
+            onDoubleClick={() => isOccupied && onUse && onUse(item, index)}
+        >
+            {isOccupied && (
+                <div className="w-full h-full flex items-center justify-center relative">
+                    {/* HIGH-RES GRAPHIC RENDERER */}
+                    {item.graphic ? (
+                        <img 
+                            src={item.graphic} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover brightness-90 group-hover:brightness-110 transition-all"
+                        />
                     ) : (
-                        <div className="text-[9px] text-slate-700 font-mono select-none">{index + 1}</div>
+                        <RenderIcon name={item.iconName || 'Box'} size={28} />
                     )}
+
+                    {/* Gradient Overlay for better text/count visibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+
+                    {/* Stack Count */}
+                    {item.count > 1 && (
+                        <span className="absolute bottom-1 right-1 text-[10px] font-mono font-bold bg-black/70 px-1.5 rounded border border-white/10 text-white z-20">
+                            {item.count}
+                        </span>
+                    )}
+                    
+                    {/* Hover Info */}
+                    <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity p-2 text-center z-30 pointer-events-none">
+                        <span className="text-[9px] font-bold uppercase text-white mb-1 leading-tight">{item.name}</span>
+                        <span className="text-[7px] text-slate-400 uppercase tracking-widest">{item.rarity}</span>
+                    </div>
                 </div>
-            ))}
+            )}
         </div>
     );
 };
 
-// --- COLLECTION BINDER ---
-export const CollectionBinder = ({ cards = [], onSell, onSellAll }) => {
-    const totalCards = Object.keys(CARD_DATABASE).length;
-    const collectedCount = cards.length;
+// --- COMPONENT: INVENTORY GRID ---
+export const InventoryGrid = ({ slots, containerId, onDragStart, onDrop, onContextMenu, mp, cash, salvage, onUseItem }) => {
+    return (
+        <div className="flex flex-col h-full">
+            {/* Currency Header (Only shows if values provided) */}
+            {(mp !== undefined || cash !== undefined || salvage !== undefined) && (
+                <div className="flex gap-4 mb-4 text-xs font-mono bg-black/20 p-2 rounded border border-slate-800 shrink-0">
+                    {mp !== undefined && <div className="flex items-center gap-1"><RenderIcon name="Brain" size={12} className="text-pink-500"/> <span className="text-white">{mp.toLocaleString()}</span></div>}
+                    {cash !== undefined && <div className="flex items-center gap-1"><RenderIcon name="DollarSign" size={12} className="text-emerald-500"/> <span className="text-white">{cash.toLocaleString()}</span></div>}
+                    {salvage !== undefined && <div className="flex items-center gap-1"><RenderIcon name="Wrench" size={12} className="text-slate-400"/> <span className="text-white">{salvage}</span></div>}
+                </div>
+            )}
+            
+            {/* The Grid */}
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-2 content-start">
+                {slots.map((slot, i) => (
+                    <InventorySlot 
+                        key={i} 
+                        index={i} 
+                        item={slot} 
+                        onDragStart={(idx) => onDragStart(containerId, idx)}
+                        onDrop={(idx) => onDrop(containerId, idx)}
+                        onContextMenu={(idx) => onContextMenu(containerId, idx)}
+                        onUse={onUseItem}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// --- COMPONENT: CARD BINDER ---
+export const CollectionBinder = ({ cards, onSell, onSellAll }) => {
+    // Group cards by ID to show counts
+    const grouped = cards.reduce((acc, id) => {
+        acc[id] = (acc[id] || 0) + 1;
+        return acc;
+    }, {});
+
+    const uniqueIds = Object.keys(grouped);
     
+    // Calculate duplicate value
+    const duplicates = uniqueIds.filter(id => grouped[id] > 1);
+    const dupValue = duplicates.reduce((total, id) => {
+        // Mock value: 100 for now, ideally fetch from DB
+        return total + ((grouped[id] - 1) * 100); 
+    }, 0);
+
     return (
         <div className="h-full flex flex-col">
-            <div className="flex justify-between items-center mb-4 p-2 bg-black/20 rounded border border-slate-800">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-purple-900/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                        <Package className="text-purple-400" />
-                    </div>
-                    <div>
-                        <div className="text-xs text-slate-400 uppercase font-bold">Collection Progress</div>
-                        <div className="text-white font-mono font-bold">{collectedCount} / {totalCards}</div>
-                    </div>
-                </div>
-                <button 
-                    onClick={() => onSellAll(true)}
-                    className="bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition-colors"
-                >
-                    <DollarSign size={14} /> Sell Duplicates
-                </button>
+            <div className="flex justify-between items-center mb-4 px-2 shrink-0">
+                <h3 className="text-sm font-bold text-slate-400 uppercase">Collection Progress</h3>
+                {dupValue > 0 && (
+                    <button 
+                        onClick={() => onSellAll({ value: dupValue })}
+                        className="bg-amber-600/20 hover:bg-amber-600/40 text-amber-500 text-xs px-3 py-1 rounded border border-amber-600/50 transition-colors"
+                    >
+                        Sell Duplicates (+{dupValue})
+                    </button>
+                )}
             </div>
-            
-            <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-1">
-                {cards.map((card) => (
-                    <div key={card.id} className={`aspect-[2/3] bg-slate-900 rounded-lg border flex flex-col items-center justify-center relative p-2 ${getRarityColor(card.rarity)}`}>
-                        <div className="text-xs font-bold text-center mb-1">{card.name}</div>
-                        <RenderIcon name={card.icon} size={32} className="mb-2 opacity-80" />
-                        <div className="text-[9px] text-center opacity-70 line-clamp-2">{card.desc}</div>
-                        <button 
-                            onClick={() => onSell(card.id, card.value)}
-                            className="absolute bottom-2 right-2 bg-black/60 hover:bg-emerald-600 text-white p-1 rounded transition-colors"
-                            title={`Sell for ${card.value}`}
-                        >
-                            <DollarSign size={10} />
-                        </button>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto custom-scrollbar p-2">
+                {uniqueIds.map(id => {
+                    // Try to find card definition, fallback to generic
+                    let def = { name: 'Unknown Card', rarity: 'Common', element: 'neutral' };
+                    
+                    // Search in BENDERS and MOVES
+                    const bender = CARD_DATABASE?.BENDERS?.find(b => b.id === id);
+                    const move = CARD_DATABASE?.MOVES?.find(m => m.id === id);
+                    if (bender) def = bender;
+                    else if (move) def = move;
+
+                    const count = grouped[id];
+                    const isDuplicate = count > 1;
+
+                    return (
+                        <div key={id} className="relative aspect-[3/4] bg-slate-900 rounded-lg border border-slate-700 overflow-hidden group hover:-translate-y-1 transition-transform">
+                            {/* Card Art Placeholder */}
+                            <div className={`absolute inset-0 opacity-30 ${def.element === 'water' ? 'bg-blue-900' : def.element === 'fire' ? 'bg-red-900' : def.element === 'earth' ? 'bg-green-900' : 'bg-slate-800'}`}></div>
+                            
+                            <div className="relative z-10 p-3 h-full flex flex-col justify-between">
+                                <div className="text-xs font-bold text-white leading-tight">{def.name}</div>
+                                <div className="text-[10px] text-slate-400">{def.rarity}</div>
+                            </div>
+
+                            {/* Count Badge */}
+                            <div className="absolute top-1 right-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/10">
+                                x{count}
+                            </div>
+
+                            {/* Sell Button (Only for single item sell flow, mostly duplicates usually sold via Sell All) */}
+                            {isDuplicate && (
+                                <button 
+                                    onClick={() => onSell(id, 100)}
+                                    className="absolute bottom-0 left-0 w-full bg-red-900/80 hover:bg-red-700 text-white text-[10px] py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    Sell 1 (+100)
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
+                {uniqueIds.length === 0 && (
+                    <div className="col-span-full text-center py-10 text-slate-500 italic">
+                        No cards collected yet. Visit the Market to buy packs!
                     </div>
-                ))}
-                {Array(Math.max(0, 8 - cards.length)).fill(0).map((_, i) => (
-                    <div key={`empty-${i}`} className="aspect-[2/3] bg-black/20 rounded-lg border border-slate-800/50 flex flex-col items-center justify-center opacity-30">
-                        <Lock size={24} className="mb-2" />
-                        <div className="text-[10px]">Undiscovered</div>
-                    </div>
-                ))}
+                )}
             </div>
         </div>
     );

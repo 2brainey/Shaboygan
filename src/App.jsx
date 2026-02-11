@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Hammer, Terminal, Package, Map, ShoppingBag } from 'lucide-react';
+import { Layout, Hammer, Terminal, Package, Map, ShoppingBag, Trophy } from 'lucide-react';
 
 // Core State - Using lowercase paths
 import { useGameStore } from './store/gamestore';
@@ -15,6 +15,7 @@ import LogisticsDashboard from './components/logisticsdashboard';
 import ShopFullPage from './components/shopfullpage';
 // FIX 1: Added missing import for EstatePrototype
 import EstatePrototype from './components/estateprototype';
+import ProBendingLeague from './components/probendingleague';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -63,6 +64,7 @@ export default function App() {
                 { id: 'inventory', label: 'Inventory', icon: Package },
                 { id: 'estate', label: 'Estate', icon: Layout },
                 { id: 'shop', label: 'Market', icon: ShoppingBag },
+                { id: 'probending', label: 'Pro-Bending', icon: Trophy },
             ].map((tab) => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-gray-800 text-white shadow-sm ring-1 ring-gray-700' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/50'}`}>
                     <tab.icon size={14} /> {tab.label}
@@ -79,9 +81,27 @@ export default function App() {
         {activeTab === 'basegame' && <BaseGame />}
         {/* FIX 3: Cleaned up EstatePrototype usage (removed props, handled by store now) */}
         {activeTab === 'estate' && <EstatePrototype />}
-        {activeTab === 'inventory' && <InventoryView inventory={data.inventory} bank={data.bank} bankBalance={data.bankBalance} cards={data.cards} discipline={data.discipline} cash={data.cash} salvage={data.salvage} onUpdateInventory={handleInventoryUpdate} onUpdateBank={handleBankUpdate} onUpdateDiscipline={handleDisciplineUpdate} onUpdateCards={(cards) => updateData({ cards })} onUseItem={handleUseItemAction} />}
+        {activeTab === 'inventory' && (
+    <InventoryView 
+        inventory={data.inventory} 
+        bank={data.bank} 
+        bankBalance={data.bankBalance || 0} // Fix: Ensure balance defaults to 0
+        cards={data.cards} 
+        discipline={data.discipline} 
+        cash={data.cash} 
+        salvage={data.salvage} 
+        onUpdateInventory={handleInventoryUpdate} 
+        onUpdateBank={handleBankUpdate}
+        // Fix: Add the missing handler for Bank Balance
+        onUpdateBankBalance={(val) => updateData({ bankBalance: val })}
+        onUpdateDiscipline={handleDisciplineUpdate} 
+        onUpdateCards={(cards) => updateData({ cards })} 
+        onUseItem={handleUseItemAction} 
+    />
+)}
         {activeTab === 'logistics' && <LogisticsDashboard />}
         {activeTab === 'shop' && <ShopFullPage discipline={data.discipline} inventory={data.inventory} lastDailyClaim={data.lastDailyClaim} lastHourlyClaim={data.lastHourlyClaim} onClaimDaily={claimDailyAction} onClaimHourly={claimHourlyAction} onPurchase={handlePurchase} />}
+        {activeTab === 'probending' && <ProBendingLeague />}
       </div>
     </div>
   );
