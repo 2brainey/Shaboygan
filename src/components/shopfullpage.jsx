@@ -119,11 +119,13 @@ const ShopItemCard = ({ item, onPurchase, canAfford, isWidget = false, ownedCoun
 export default function ShopFullPage({ onPurchase, discipline, inventory = [], lastDailyClaim, lastHourlyClaim, onClaimDaily, onClaimHourly }) {
   const [activeCategory, setActiveCategory] = useState('boosters');
   const [viewMode, setViewMode] = useState('card');
-  const isFullPage = true; // Explicit definition to avoid ReferenceError
+  const isFullPage = true; 
   
-  // --- Claim Logic derived from props ---
-  const [timeNow, setTimeNow] = useState;
+  // FIX: Added parentheses and initial value
+  const [timeNow, setTimeNow] = useState(Date.now());
+
   useEffect(() => {
+    // Updates every minute
     const t = setInterval(() => setTimeNow(Date.now()), 60000); 
     return () => clearInterval(t);
   }, []);
@@ -179,6 +181,7 @@ export default function ShopFullPage({ onPurchase, discipline, inventory = [], l
         </div>
 
         <div className="flex-1 flex overflow-hidden">
+            {/* Sidebar Navigation */}
             <div className="w-16 md:w-56 bg-[#131313] border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto custom-scrollbar">
                 <div className="p-2 space-y-1">
                     {categories.map(cat => (
@@ -200,7 +203,10 @@ export default function ShopFullPage({ onPurchase, discipline, inventory = [], l
                 </div>
             </div>
 
+            {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-gradient-to-b from-[#0f1219] to-[#131313]">
+                
+                {/* Daily Reward Banner */}
                 {activeCategory === 'crates' && (
                     <div className="mb-8">
                         <div className="rounded-xl bg-gradient-to-r from-blue-900/20 to-slate-900 border border-blue-500/30 p-4 flex items-center justify-between gap-4 shadow-lg relative overflow-hidden">
@@ -225,6 +231,7 @@ export default function ShopFullPage({ onPurchase, discipline, inventory = [], l
                     </div>
                 )}
 
+                {/* Grid/List Controls */}
                 <div className="flex items-center justify-between gap-3 mb-4">
                     <h2 className="text-xl font-bold text-white capitalize">{categories.find(c => c.id === activeCategory)?.label}</h2>
                     <div className="flex items-center gap-3">
@@ -236,6 +243,7 @@ export default function ShopFullPage({ onPurchase, discipline, inventory = [], l
                     </div>
                 </div>
 
+                {/* Items Grid */}
                 {viewMode === 'card' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {currentItems.map(item => (
@@ -251,6 +259,21 @@ export default function ShopFullPage({ onPurchase, discipline, inventory = [], l
                                 onClaimHourly={onClaimHourly}
                                 timeRemaining={getHourlyRemaining()}
                             />
+                        ))}
+                    </div>
+                )}
+
+                {/* NOTE: You haven't implemented 'list' view yet. 
+                    If you click the list button, it will be blank. 
+                    I added this fallback below for you. */}
+                {viewMode === 'list' && (
+                    <div className="flex flex-col gap-2">
+                        {/* Placeholder for list view implementation */}
+                         {currentItems.map(item => (
+                            <div key={item.id} className="bg-[#1e1e1e] p-4 rounded border border-slate-800 text-white flex justify-between items-center">
+                                <span className="font-bold">{item.name}</span>
+                                <span className="text-emerald-400 font-mono">{item.cost} BM</span>
+                            </div>
                         ))}
                     </div>
                 )}

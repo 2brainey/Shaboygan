@@ -13,6 +13,8 @@ import BaseGame from './basegame';
 import InventoryView from './components/inventoryprototype';
 import LogisticsDashboard from './components/logisticsdashboard';
 import ShopFullPage from './components/shopfullpage';
+// FIX 1: Added missing import for EstatePrototype
+import EstatePrototype from './components/estateprototype';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -28,9 +30,10 @@ export default function App() {
       handleUseItemAction 
   } = useGameStore();
 
+  // FIX 2: Added [loadGame] dependency to silence the warning
   useEffect(() => {
       loadGame();
-  }, []);
+  }, [loadGame]);
 
   // Syncing store functions to Batch 1 component props
   const handleInventoryUpdate = (newInv) => updateData({ inventory: newInv });
@@ -74,7 +77,8 @@ export default function App() {
         {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
         {activeTab === 'uibuilder' && <UIBuilder />}
         {activeTab === 'basegame' && <BaseGame />}
-        {activeTab === 'estate' && <EstatePrototype discipline={data.discipline} setDiscipline={handleDisciplineUpdate} salvage={data.salvage} setSalvage={(val) => updateData({ salvage: val })} />}
+        {/* FIX 3: Cleaned up EstatePrototype usage (removed props, handled by store now) */}
+        {activeTab === 'estate' && <EstatePrototype />}
         {activeTab === 'inventory' && <InventoryView inventory={data.inventory} bank={data.bank} bankBalance={data.bankBalance} cards={data.cards} discipline={data.discipline} cash={data.cash} salvage={data.salvage} onUpdateInventory={handleInventoryUpdate} onUpdateBank={handleBankUpdate} onUpdateDiscipline={handleDisciplineUpdate} onUpdateCards={(cards) => updateData({ cards })} onUseItem={handleUseItemAction} />}
         {activeTab === 'logistics' && <LogisticsDashboard />}
         {activeTab === 'shop' && <ShopFullPage discipline={data.discipline} inventory={data.inventory} lastDailyClaim={data.lastDailyClaim} lastHourlyClaim={data.lastHourlyClaim} onClaimDaily={claimDailyAction} onClaimHourly={claimHourlyAction} onPurchase={handlePurchase} />}
