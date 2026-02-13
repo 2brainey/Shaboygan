@@ -8,6 +8,7 @@ import { useGameStore } from './store/gamestore';
 import Dashboard from './dashboard';
 import UIBuilder from './uibuilder';
 import BaseGame from './basegame';
+import PlayerProfile from './components/playerprofile';
 
 // Batch 1 Components - Fixed lowercase imports to stop 500 errors
 import InventoryView from './components/inventoryprototype';
@@ -19,6 +20,8 @@ import ProBendingLeague from './components/probendingleague';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   const { 
       data, 
@@ -72,8 +75,17 @@ export default function App() {
             ))}
             </div>
         </div>
-        <div className="w-8 shrink-0"><div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-500 border-2 border-gray-900 shadow-lg"></div></div> 
-      </div>
+        {/* Profile Trigger Button */}
+        <button 
+            onClick={() => setIsProfileOpen(true)}
+            className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-500 p-[2px] shadow-lg cursor-pointer hover:scale-105 hover:shadow-emerald-500/20 transition-all group"
+        >
+            <div className="h-full w-full rounded-full bg-gray-900 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors"></div>
+                <span className="text-[10px] font-bold text-emerald-400 group-hover:text-white">DEV</span>
+            </div>
+        </button>
+      </div> {/* End of Header div */}
 
       <div className="flex-1 overflow-hidden relative bg-gray-950">
         {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
@@ -103,6 +115,14 @@ export default function App() {
         {activeTab === 'shop' && <ShopFullPage discipline={data.discipline} inventory={data.inventory} lastDailyClaim={data.lastDailyClaim} lastHourlyClaim={data.lastHourlyClaim} onClaimDaily={claimDailyAction} onClaimHourly={claimHourlyAction} onPurchase={handlePurchase} />}
         {activeTab === 'probending' && <ProBendingLeague />}
       </div>
+      {/* ... your activeTab renders ... */}
+      
+      {/* GLOBAL OVERLAYS */}
+      <PlayerProfile 
+          isOpen={isProfileOpen} 
+          onClose={() => setIsProfileOpen(false)} 
+          setActiveTab={setActiveTab}
+      />
     </div>
   );
 }

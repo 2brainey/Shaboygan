@@ -15,7 +15,7 @@ const WidgetHeader = ({ icon, title, value, color }) => (
     </div>
 );
 
-// --- 1. UPDATED BACKPACK WIDGET WITH GRAPHICS SUPPORT ---
+// --- 1. UPDATED BACKPACK WIDGET WITH RARITY COLORS & GRAPHICS ---
 export const BackpackWidget = ({ setActiveTab }) => {
     const { data } = useGameStore();
     const inventory = data.inventory || Array(20).fill(null);
@@ -24,6 +24,19 @@ export const BackpackWidget = ({ setActiveTab }) => {
     
     // Preview the first 8 slots
     const previewSlots = inventory.slice(0, 8);
+
+    // Helper to match the main inventory style
+    const getRarityStyle = (item) => {
+        if (!item) return 'bg-transparent border-slate-800/50 border-dashed opacity-50'; // Empty slot style
+        
+        switch(item.rarity) {
+            case 'Legendary': return 'bg-[#0a0a0a] border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]';
+            case 'Epic': return 'bg-[#0a0a0a] border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.2)]';
+            case 'Rare': return 'bg-[#0a0a0a] border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.2)]';
+            case 'Uncommon': return 'bg-[#0a0a0a] border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
+            default: return 'bg-[#0a0a0a] border-slate-700 shadow-inner'; // Common
+        }
+    };
 
     return (
         <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-4 hover:border-orange-500/30 transition-all group shadow-2xl">
@@ -38,9 +51,7 @@ export const BackpackWidget = ({ setActiveTab }) => {
                 {previewSlots.map((item, i) => (
                     <div 
                         key={i} 
-                        className={`aspect-square rounded-lg border overflow-hidden flex items-center justify-center relative transition-transform hover:scale-105 ${
-                            item ? 'bg-[#0a0a0a] border-slate-700 shadow-inner' : 'bg-transparent border-slate-800/50 border-dashed'
-                        }`}
+                        className={`aspect-square rounded-lg border overflow-hidden flex items-center justify-center relative transition-transform hover:scale-105 ${getRarityStyle(item)}`}
                     >
                         {item ? (
                             <>
@@ -48,15 +59,27 @@ export const BackpackWidget = ({ setActiveTab }) => {
                                 {item.graphic ? (
                                     <img 
                                         src={item.graphic} 
-                                        className="w-full h-full object-cover brightness-95 group-hover:brightness-110" 
+                                        className="w-full h-full object-cover brightness-90 group-hover:brightness-110 transition-all" 
                                         alt={item.name} 
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex'; 
+                                        }}
                                     />
-                                ) : (
-                                    <RenderIcon name={item.iconName || 'Box'} size={18} className="text-slate-400"/>
-                                )}
+                                ) : null}
 
-                                {/* Subtle Overlay for Count Visibility */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                                {/* Fallback Icon Container */}
+                                <div className={`w-full h-full flex items-center justify-center ${item.graphic ? 'hidden' : 'flex'}`}>
+                                    {/* Using item color for icon if available, else slate */}
+                                    <RenderIcon 
+                                        name={item.iconName || 'Box'} 
+                                        size={18} 
+                                        className={item.rarity === 'Legendary' ? 'text-amber-500' : item.rarity === 'Rare' ? 'text-blue-400' : 'text-slate-400'}
+                                    />
+                                </div>
+
+                                {/* Subtle Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none opacity-60"></div>
 
                                 {/* Stack Count Badge */}
                                 {item.count > 1 && (
